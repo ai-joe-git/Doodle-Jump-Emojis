@@ -12,7 +12,7 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
-            background: linear-gradient(to bottom, #1a237e, #4a148c, #880e4f);
+            background: #000;
             font-family: Arial, sans-serif;
             overflow: hidden;
         }
@@ -50,7 +50,7 @@
             width: 40,
             height: 40,
             speed: 5,
-            jumpForce: -15,  // Increased jump force
+            jumpForce: -15,
             velocityY: 0,
             grounded: false
         };
@@ -60,33 +60,37 @@
         let gameOver = false;
         let gravity = 0.6;
 
-        // Parallax backgrounds
-        let backgrounds = [
-            { img: new Image(), y: 0, speed: 0.5 },
-            { img: new Image(), y: 0, speed: 1 },
-            { img: new Image(), y: 0, speed: 1.5 }
-        ];
-
-        backgrounds[0].img.src = 'https://i.imgur.com/875uw1J.png';
-        backgrounds[1].img.src = 'https://i.imgur.com/eYlrq2m.png';
-        backgrounds[2].img.src = 'https://i.imgur.com/VudQnFw.png';
+        // Emoji-based background
+        const bgEmojis = ['🌠', '⭐', '🌙'];
+        let bgParticles = [];
 
         // Emojis
         let playerEmoji = '🦸';
-        let platformEmoji = '🪵';
+        let platformEmojis = ['🪵', '🧱', '🌴', '☁️'];
 
         // Create initial platforms
         function createPlatform(y) {
             return {
-                x: Math.random() * (canvas.width - 70),
+                x: Math.random() * (canvas.width - 100),
                 y: y,
-                width: 70,
-                height: 20
+                width: Math.random() * (120 - 80) + 80,
+                height: 20,
+                emoji: platformEmojis[Math.floor(Math.random() * platformEmojis.length)]
             };
         }
 
         for (let i = 0; i < 7; i++) {
             platforms.push(createPlatform(i * 100));
+        }
+
+        // Create background particles
+        for (let i = 0; i < 50; i++) {
+            bgParticles.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                speed: Math.random() * 0.5 + 0.1,
+                emoji: bgEmojis[Math.floor(Math.random() * bgEmojis.length)]
+            });
         }
 
         // Game loop
@@ -138,11 +142,12 @@
                     }
                 });
 
-                // Move parallax backgrounds
-                backgrounds.forEach(bg => {
-                    bg.y += bg.speed * delta;
-                    if (bg.y > canvas.height) {
-                        bg.y = -canvas.height;
+                // Move background particles
+                bgParticles.forEach(particle => {
+                    particle.y += particle.speed * delta;
+                    if (particle.y > canvas.height) {
+                        particle.y = -20;
+                        particle.x = Math.random() * canvas.width;
                     }
                 });
             }
@@ -155,18 +160,21 @@
 
         // Draw game objects
         function draw() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#000033';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // Draw parallax backgrounds
-            backgrounds.forEach(bg => {
-                ctx.drawImage(bg.img, 0, bg.y, canvas.width, canvas.height);
-                ctx.drawImage(bg.img, 0, bg.y - canvas.height, canvas.width, canvas.height);
+            // Draw background particles
+            ctx.font = '20px Arial';
+            bgParticles.forEach(particle => {
+                ctx.fillText(particle.emoji, particle.x, particle.y);
             });
 
             // Draw platforms
-            ctx.fillStyle = 'white';
             platforms.forEach(platform => {
-                ctx.fillText(platformEmoji, platform.x, platform.y, platform.width, platform.height);
+                ctx.font = '20px Arial';
+                for (let i = 0; i < platform.width; i += 20) {
+                    ctx.fillText(platform.emoji, platform.x + i, platform.y);
+                }
             });
 
             // Draw player
